@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block content %}
+<div class="transactions">
+    <h2>Transaction History</h2>
+    
+    <div class="card">
+        {% if transactions %}
+            <table class="transactions-table full-width">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Counterparty</th>
+                        <th>Price (USD)</th>
+                        <th>Value (USD)</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td>{{ tx['transaction_date'][:16] }}</td>
+                        <td>
+                            {% if tx['sender_id'] == current_user.id %}
+                                Sent
+                            {% else %}
+                                Received
+                            {% endif %}
+                        </td>
+                        <td class="{% if tx['sender_id'] == current_user.id %}negative{% else %}positive{% endif %}">
+                            {% if tx['sender_id'] == current_user.id %}-{% else %}+{% endif %}
+                            {{ "%.2f"|format(tx['amount']) }} {{ cryptoSymbol }}
+                        </td>
+                        <td>
+                            {% if tx['sender_id'] == current_user.id %}
+                                To: {{ tx['receiver_username'] }}
+                            {% else %}
+                                From: {{ tx['sender_username'] }}
+                            {% endif %}
+                        </td>
+                        <td>${{ "%.2f"|format(tx['crypto_price']) }}</td>
+                        <td>${{ "%.2f"|format(tx['amount'] * tx['crypto_price']) }}</td>
+                        <td>{{ tx['description'] or '' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No transactions yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
